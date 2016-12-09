@@ -96,3 +96,58 @@ plateformBrowserDynamic().bootstrapModule(DiSampleAppAppModule)
   ]
 })
 class DiSampleAppAppModule {}
+
+
+//  Injects diff values as the apiUrl depending  production or dev mode
+
+import { Inject } from '@angular/core'
+
+export const API_URL: string = 'API_URL'
+
+export class ApiService {
+  constructor(@Inject(API_URL) private apiUrl: string ) {
+  }
+
+  get(): void {
+    console.log(`Calling ${this.apiUrl}/endpoint...`)
+  }
+}
+
+@Component({
+  selector: 'di-value-app',
+  template: `
+    <button (click)="invokeApi()" Invoke Api</button>
+      `
+})
+
+class DiValueApp {
+  constructor(private apiService: ApiService) {
+  }
+
+  invokeApi(): void {
+    this.apiService.get()
+  }
+}
+
+//  next step is to configure the application with the providers:
+
+const isProduction: boolean = false
+
+@NgModule({
+  declarations: [DiValueApp],
+  imports: [BrowsserModule]
+  bootstrap: [DiValueApp],
+  providers: [
+    { ApiService, useClass: ApiService},
+    {
+      provide: API_URL,
+      useValue: isProduction ?
+        'https://production-api.sample.com' :
+        'http://dev-api.sample.com'
+    }
+  ]
+})
+
+class DiValueAppAppModule {}
+
+plateformBrowserDynamic().bootstrapModule(DiValueAppAppModule)
